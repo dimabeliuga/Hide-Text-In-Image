@@ -6,10 +6,10 @@
 
 // Подключаем реализации stb_image и stb_image_write
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "external/stb_image.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
+#include "external/stb_image_write.h"
 
 namespace ImageHandler {
 
@@ -29,17 +29,20 @@ bool isSupportedFormat(const std::string& filename) {
 
 Image loadImage(const std::string& filename) {
     if (!fileExists(filename)) {
-        throw std::runtime_error("Файл не существует: " + filename);
+        LOG_ERROR("The file: {} does not exist", filename);
+        exit(EXIT_FAILURE);
     }
     if (!isSupportedFormat(filename)) {
-        throw std::runtime_error("Неподдерживаемый формат файла: " + filename);
+        LOG_ERROR("Unsupported file format: {}", filename);
+        exit(EXIT_FAILURE);
     }
 
     int width, height, channels;
     // Загружаем изображение с сохранением исходного количества каналов
     unsigned char* imgData = stbi_load(filename.c_str(), &width, &height, &channels, 0);
     if (!imgData) {
-        throw std::runtime_error("Не удалось загрузить изображение: " + filename);
+        LOG_ERROR("Failed to load the image: {}", filename);
+        exit(EXIT_FAILURE);
     }
 
     size_t dataSize = static_cast<size_t>(width) * height * channels;
@@ -48,12 +51,14 @@ Image loadImage(const std::string& filename) {
     // Освобождаем память, выделенную stb_image
     stbi_image_free(imgData);
 
+    LOG_INFO("Image information was loaded from the image succesfully");
     return Image{ width, height, channels, data };
 }
 
 void saveImage(const std::string& filename, const Image& image) {
     if (!isSupportedFormat(filename)) {
-        throw std::runtime_error("Неподдерживаемый формат файла для сохранения: " + filename);
+        LOG_ERROR("Unsuported file format {}", filename);
+        exit(EXIT_FAILURE);
     }
 
     std::string lowerFilename = filename;
@@ -70,8 +75,10 @@ void saveImage(const std::string& filename, const Image& image) {
     }
 
     if (!success) {
-        throw std::runtime_error("Не удалось сохранить изображение: " + filename);
+        LOG_ERROR("Failed to save image");
+        exit(EXIT_FAILURE);
     }
+    LOG_INFO("The picture was saved in {}", filename);
 }
 
 } // namespace ImageHandler

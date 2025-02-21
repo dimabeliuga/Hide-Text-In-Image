@@ -1,29 +1,45 @@
 cmake_minimum_required(VERSION 3.25)
 project(SteganoEncrypt)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)  # Update to C++17
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Включаем пути для заголовочных файлов
-include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/external/)
+# Add compile definitions
+add_definitions(-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
+add_definitions(-DUSE_LOGGER)
 
-# Добавляем исходные файлы
-set(SOURCES
-    src/main.cpp
-    src/encryption.cpp
-    src/key_derivation.cpp
-    src/image_handler.cpp
-    src/stegano.cpp
-    src/utils.cpp
+# Find packages properly
+find_package(OpenSSL REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+find_package(fmt CONFIG REQUIRED)
+
+# Include directories
+include_directories(
+    ${PROJECT_SOURCE_DIR}/include 
+    ${PROJECT_SOURCE_DIR}/external
+    ${PROJECT_SOURCE_DIR}/encryption
 )
 
-# Добавляем исполняемый файл
+# Source files
+set(SOURCES
+    src/main.cpp
+    src/image_handler.cpp
+    src/stegano.cpp
+    src/CliParser.cpp
+    src/encryption/utils.cpp
+    src/encryption/encryption.cpp
+    src/encryption/key_derivation.cpp
+    src/encryption/data_conversion.cpp
+    src/encryption/decryption.cpp
+)
+
+# Create executable
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-# Линкуем с OpenSSL (проверьте, что OpenSSL установлен и CMake может его найти)
-find_package(OpenSSL REQUIRED)
-if(OPENSSL_FOUND)
-    target_include_directories(${PROJECT_NAME} PRIVATE ${OPENSSL_INCLUDE_DIR})
-    target_link_libraries(${PROJECT_NAME} ${OPENSSL_LIBRARIES})
-endif()
+# Link libraries properly
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    OpenSSL::SSL
+    OpenSSL::Crypto
+    spdlog::spdlog
+    fmt::fmt
+)

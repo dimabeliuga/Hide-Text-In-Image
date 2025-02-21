@@ -1,9 +1,11 @@
 #include "stegano.h"
+
 #include <random>
 #include <algorithm>
 #include <stdexcept>
 #include <cstdint>
 #include <vector>
+#include <thread>
 
 namespace Stegano {
 
@@ -18,6 +20,8 @@ static std::vector<size_t> generateShuffledIndices(size_t n, const std::vector<u
     std::seed_seq seedSeq(seedData.begin(), seedData.end());
     std::mt19937 rng(seedSeq);
     std::shuffle(indices.begin(), indices.end(), rng);
+    
+    LOG_INFO("Shuffled Indices were compiled successfuly");
     return indices;
 }
 
@@ -28,11 +32,36 @@ void embedData(ImageHandler::Image& image, const std::vector<uint8_t>& message, 
     size_t messageBits = message.size() * 8;
 
     if (messageBits > totalBits) {
-        throw std::runtime_error("Сообщение слишком велико для данного изображения.");
+        LOG_ERROR("The message is too big. It is impossible to place the all text into the picture");
+        exit(EXIT_FAILURE);
     }
 
     // Генерируем псевдослучайную перестановку индексов на основе ключа.
     std::vector<size_t> shuffledIndices = generateShuffledIndices(totalBits, key);
+
+    std::thread fillUnecessaryBits([&](){
+        // Для оставшихся позиций производим случайное изменение LSB для маскировки.
+        // Используем тот же ключ для инициализации генератора.
+        std::vector<unsigned int> seedData(key.begin(), key.end());
+        std::seed_seq seedSeq(seedData.begin(), seedData.end());
+        std::mt19937 rng(seedSeq);
+        std::uniform_int_distribution<int> coinFlip(0, 1);
+
+        for (size_t i = messageBits; i < totalBits; i++) {
+            size_t dataIndex = shuffledIndices[i];
+            uint8_t currentValue = image.data[dataIndex];
+            int direction = (coinFlip(rng) == 0) ? -1 : 1;
+
+            // Обеспечиваем, чтобы значение не вышло за пределы [0, 255]
+            if (currentValue == 0) {
+                direction = 1;
+            } else if (currentValue == 255) {
+                direction = -1;
+            }
+            int newValue = static_cast<int>(currentValue) + direction;
+            image.data[dataIndex] = static_cast<uint8_t>(newValue);
+        }
+    });
 
     // Встраиваем биты сообщения в выбранные позиции.
     for (size_t bitIndex = 0; bitIndex < messageBits; bitIndex++) {
@@ -45,27 +74,11 @@ void embedData(ImageHandler::Image& image, const std::vector<uint8_t>& message, 
         image.data[dataIndex] = (image.data[dataIndex] & 0xFE) | bitValue;
     }
 
-    // Для оставшихся позиций производим случайное изменение LSB для маскировки.
-    // Используем тот же ключ для инициализации генератора.
-    std::vector<unsigned int> seedData(key.begin(), key.end());
-    std::seed_seq seedSeq(seedData.begin(), seedData.end());
-    std::mt19937 rng(seedSeq);
-    std::uniform_int_distribution<int> coinFlip(0, 1);
-
-    for (size_t i = messageBits; i < totalBits; i++) {
-        size_t dataIndex = shuffledIndices[i];
-        uint8_t currentValue = image.data[dataIndex];
-        int direction = (coinFlip(rng) == 0) ? -1 : 1;
-
-        // Обеспечиваем, чтобы значение не вышло за пределы [0, 255]
-        if (currentValue == 0) {
-            direction = 1;
-        } else if (currentValue == 255) {
-            direction = -1;
-        }
-        int newValue = static_cast<int>(currentValue) + direction;
-        image.data[dataIndex] = static_cast<uint8_t>(newValue);
+    if(fillUnecessaryBits.joinable()){
+        fillUnecessaryBits.join();
+        LOG_INFO("fillUnecessaryBits thread was joined");
     }
+    LOG_INFO("The data was embeded in the picture");
 }
 
 std::vector<uint8_t> extractData(const ImageHandler::Image& image, size_t messageLength, const std::vector<uint8_t>& key) {
@@ -74,7 +87,8 @@ std::vector<uint8_t> extractData(const ImageHandler::Image& image, size_t messag
     size_t messageBits = messageLength * 8;
 
     if (messageBits > totalBits) {
-        throw std::runtime_error("Указанная длина сообщения превышает вместимость изображения.");
+        LOG_ERROR("The specified message length exceeds the image capacity");
+        exit(EXIT_FAILURE);
     }
 
     // Генерируем ту же последовательность перестановки.
@@ -89,6 +103,8 @@ std::vector<uint8_t> extractData(const ImageHandler::Image& image, size_t messag
         size_t bitInByte = 7 - (bitIndex % 8);
         message[byteIndex] |= (bitValue << bitInByte);
     }
+
+    LOG_INFO("The data was extracted from the file");
     return message;
 }
 

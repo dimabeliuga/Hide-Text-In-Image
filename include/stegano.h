@@ -4,6 +4,8 @@
 #include <vector>
 #include <cstdint>
 #include "image_handler.h"
+#include "external/logger.h"
+
 
 namespace Stegano {
 

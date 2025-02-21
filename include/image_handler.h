@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <cstdint>
-
+#include "external/logger.h"
 namespace ImageHandler {
 
     // Структура для хранения данных изображения
