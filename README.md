@@ -24,7 +24,7 @@ Uses spdlog for structured and configurable logging, which aids in debugging and
 SteganoEncrypt is built using CMake and requires OpenSSL for encryption as well as spdlog for logging. Detailed instructions for building and running the application can be found in the project documentation.
 
 ## - Future Enhancements ##
-1. ** Performance Optimization: **
+1. Performance Optimization:
 Explore techniques to further accelerate the program, such as advanced parallelization of steganographic operations and optimizing random index selection to reduce overhead.
 
 2. Cross-Platform Portability:
