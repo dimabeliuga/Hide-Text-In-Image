@@ -7,6 +7,7 @@
 #include <vector>
 #include <thread>
 
+
 namespace Stegano {
 
 // Вспомогательная функция для генерации перестановки индексов [0, n-1] на основе ключа.
@@ -27,13 +28,13 @@ static std::vector<size_t> generateShuffledIndices(size_t n, const std::vector<u
 
 void embedData(ImageHandler::Image& image, const std::vector<uint8_t>& message, const std::vector<uint8_t>& key) {
     // Количество доступных байтов (каждый канал - 1 байт)
-    size_t totalChannels = image.data.size();
-    size_t totalBits = totalChannels; // 1 бит на канал
+    size_t totalBits = image.data.size(); // 1 бит на канал
     size_t messageBits = message.size() * 8;
 
     if (messageBits > totalBits) {
         LOG_ERROR("The message is too big. It is impossible to place the all text into the picture");
         exit(EXIT_FAILURE);
+
     }
 
     // Генерируем псевдослучайную перестановку индексов на основе ключа.
@@ -81,9 +82,9 @@ void embedData(ImageHandler::Image& image, const std::vector<uint8_t>& message, 
     LOG_INFO("The data was embeded in the picture");
 }
 
+
 std::vector<uint8_t> extractData(const ImageHandler::Image& image, size_t messageLength, const std::vector<uint8_t>& key) {
-    size_t totalChannels = image.data.size();
-    size_t totalBits = totalChannels;
+    size_t totalBits = image.data.size();
     size_t messageBits = messageLength * 8;
 
     if (messageBits > totalBits) {

@@ -5,51 +5,58 @@
 #include <vector>
 #include <cstdint>
 #include "external/logger.h"
+
 namespace ImageHandler {
 
-    // Структура для хранения данных изображения
+    /**
+     * @brief Structure for storing image data.
+     * 
+     * Contains essential metadata about the image, such as width, height, number of color channels,
+     * and raw pixel data.
+     */
     struct Image {
-        int width;                // Ширина изображения
-        int height;               // Высота изображения
-        int channels;             // Количество каналов (например, 3 для RGB, 4 для RGBA)
-        std::vector<uint8_t> data; // Сырые пиксельные данные
+        int width;                ///< Image width.
+        int height;               ///< Image height.
+        int channels;             ///< Number of color channels (e.g., 3 for RGB, 4 for RGBA).
+        std::vector<uint8_t> data; ///< Raw pixel data.
     };
 
     /**
-     * @brief Проверяет, существует ли файл.
-     *
-     * @param filename Путь к файлу.
-     * @return true, если файл существует, иначе false.
+     * @brief Checks whether a file exists.
+     * 
+     * @param filename Path to the file.
+     * @return true if the file exists, false otherwise.
      */
     bool fileExists(const std::string& filename);
 
     /**
-     * @brief Проверяет, поддерживается ли формат файла (только bmp и png).
-     *
-     * @param filename Путь к файлу.
-     * @return true, если формат поддерживается, иначе false.
+     * @brief Checks if the file format is supported (only BMP and PNG).
+     * 
+     * @param filename Path to the file.
+     * @return true if the format is supported, false otherwise.
      */
     bool isSupportedFormat(const std::string& filename);
 
     /**
-     * @brief Загружает изображение из файла.
-     *
-     * Функция проверяет существование файла и его формат, затем загружает изображение и возвращает его в виде структуры Image.
-     *
-     * @param filename Путь к файлу изображения.
-     * @return Image Загруженное изображение.
-     * @throws std::runtime_error Если файл не существует, формат неподдерживаемый или произошла ошибка при загрузке.
+     * @brief Loads an image from a file.
+     * 
+     * This function verifies the file existence and format before loading the image
+     * and returning it as an `Image` structure.
+     * 
+     * @param filename Path to the image file.
+     * @return Image Loaded image.
+     * @throws std::runtime_error If the file does not exist, the format is unsupported, or an error occurs while loading.
      */
     Image loadImage(const std::string& filename);
 
     /**
-     * @brief Сохраняет изображение в файл.
-     *
-     * Выбор функции сохранения (PNG или BMP) определяется по расширению файла.
-     *
-     * @param filename Путь к файлу для сохранения изображения.
-     * @param image Структура Image с данными изображения.
-     * @throws std::runtime_error Если формат файла неподдерживаемый или произошла ошибка при сохранении.
+     * @brief Saves an image to a file.
+     * 
+     * The function determines the save format (PNG or BMP) based on the file extension.
+     * 
+     * @param filename Path to the output file.
+     * @param image The `Image` structure containing image data.
+     * @throws std::runtime_error If the file format is unsupported or an error occurs while saving.
      */
     void saveImage(const std::string& filename, const Image& image);
 

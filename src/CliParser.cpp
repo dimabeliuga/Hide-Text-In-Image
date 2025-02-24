@@ -30,18 +30,15 @@ CliConfig& CliParser::parse(int argc, char** argv){
         // Если пароль не задан в режиме шифрования, предложим сгенерировать надёжный.
         generatePassphrase(config.passphrase);
     }
-
-    validateOutputPath(config.outFile);
+    
+    if(config.modeCrypt){
+        validateOutputPath(config.outFile);
+    }
 
     return config;
 }
 
 bool CliParser::extractCommandLineArguments(int argc, char** argv, CliConfig& config){
-    if(argc < 3){
-        errorMessage = "Error: too few arguments. Try again...";
-        return false;
-    }
-
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
         if (arg == "--crypt") {
@@ -140,10 +137,10 @@ void CliParser::validateOutputPath(std::string& outputPath){
     std::filesystem::path fileName = output.filename();
 
     if(parrentPath.empty() || !std::filesystem::is_directory(parrentPath)){
-        if(fileName.extension().empty()){
+        if(fileName.empty()){
+        fileName = "output.bmp";
+        } else if(fileName.extension().empty()){
             fileName += ".bmp";
-        } else if(fileName.empty()){
-            fileName = "output.bmp";
         }
         outputPath = promtSaveFileInCurrentDirectory(fileName.string());
     } else if(fileName.extension().empty()) {

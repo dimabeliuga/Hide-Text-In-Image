@@ -8,14 +8,14 @@
 namespace KeyDerivation {
 
     /**
-     * @brief Выводит бинарный ключ из строкового пароля с использованием PBKDF2 и HMAC-SHA256.
+     * @brief Derives a binary key from a string passphrase using PBKDF2 with HMAC-SHA256.
      *
-     * @param passphrase Строковый ключ, введённый пользователем.
-     * @param salt Соль для повышения стойкости вывода ключа.
-     * @param iterations Количество итераций (рекомендуется не менее 10000).
-     * @param keyLength Желаемая длина бинарного ключа в байтах.
-     * @return std::vector<uint8_t> Выведенный бинарный ключ.
-     * @throws std::runtime_error Если вывод ключа не удался.
+     * @param passphrase The string key entered by the user.
+     * @param salt The salt to enhance the strength of the derived key.
+     * @param iterations The number of iterations (recommended at least 10000).
+     * @param keyLength The desired length of the binary key in bytes.
+     * @return std::vector<uint8_t> The derived binary key.
+     * @throws std::runtime_error If key derivation fails.
      */
     std::vector<uint8_t> deriveKey(const std::string& passphrase, 
                                    const std::vector<uint8_t>& salt, 
@@ -23,11 +23,11 @@ namespace KeyDerivation {
                                    size_t keyLength);
 
     /**
-     * @brief Генерирует криптографически стойкую случайную соль заданной длины.
+     * @brief Generates a cryptographically strong random salt of the specified length.
      *
-     * @param saltLength Длина соли в байтах.
-     * @return std::vector<uint8_t> Сгенерированная соль.
-     * @throws std::runtime_error Если не удалось сгенерировать соль.
+     * @param saltLength The length of the salt in bytes.
+     * @return std::vector<uint8_t> The generated salt.
+     * @throws std::runtime_error If salt generation fails.
      */
     std::vector<uint8_t> generateSalt(size_t saltLength);
 
